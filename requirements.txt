@@ -4,3 +4,9 @@ numpy
 plotly
 scikit-learn
 scipy
+streamlit
+pandas
+numpy
+plotly
+scikit-learn
+statsmodels
