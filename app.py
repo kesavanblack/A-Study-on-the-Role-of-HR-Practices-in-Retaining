@@ -435,18 +435,41 @@ elif nav == "📂  Dataset":
             col4.metric("Missing Values", df.isnull().sum().sum())
 
             # Descriptive Statistics
+           # ───────── Descriptive Statistics (Cloud Safe) ─────────
             st.markdown("<div class='section-title'>Descriptive Statistics</div>", unsafe_allow_html=True)
+            
             num_cols = df.select_dtypes(include=np.number).columns.tolist()
-            desc = df[num_cols].describe().T
-            desc["skewness"] = df[num_cols].skew()
-            desc["kurtosis"] = df[num_cols].kurtosis()
-            st.dataframe(desc.style.background_gradient(cmap="Blues", subset=["mean", "std"]).format("{:.2f}"),
-                         width="stretch")
-
-            buf = io.BytesIO()
-            df.to_csv(buf, index=False)
-            st.download_button("⬇ Download Sample CSV", buf.getvalue(), "sample_hr_data.csv", "text/csv")
-
+            
+            if len(num_cols) == 0:
+                st.warning("No numeric columns found in dataset.")
+            else:
+                desc = df[num_cols].describe().T
+                desc["skewness"] = df[num_cols].skew()
+                desc["kurtosis"] = df[num_cols].kurtosis()
+            
+                # Round values instead of using Pandas Styler
+                desc = desc.round(2)
+            
+                st.dataframe(
+                    desc,
+                    use_container_width=True,
+                    column_config={
+                        "mean": st.column_config.ProgressColumn(
+                            "Mean",
+                            help="Average value",
+                            format="%.2f",
+                            min_value=float(desc["mean"].min()),
+                            max_value=float(desc["mean"].max()),
+                        ),
+                        "std": st.column_config.ProgressColumn(
+                            "Std Dev",
+                            help="Standard deviation",
+                            format="%.2f",
+                            min_value=float(desc["std"].min()),
+                            max_value=float(desc["std"].max()),
+                        ),
+                    }
+                )
 
 # ─────────────────────────────────────────────
 #  PAGE: EDA  (Greatly Expanded)
